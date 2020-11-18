@@ -1,154 +1,130 @@
-// Проверка репозитория ++
 // Раздел с классами
-class HumanBorn {
-    constructor() {
-        this.name = name;
-        this.age = age;
-        this.healthPoint = healthPoint;
-        this.money = money;
-    }
-    takeWeapon(weaponName) {
-        this.weapon = weaponName;
-    }
-    useWeapon(targetName) {
-        let shotResult = ((Math.floor(Math.random() * 100)) / 100);
-        if (shotResult <= this.weapon.accuracy) {
-            targetName.healthPoint = targetName.healthPoint - this.weapon.damage;
-            console.log('Есть попадание!');
-        } else {
-            console.log('Промах!')
-        }
-    }
+class Human {
+  constructor(name, age, healthPoints, money) {
+    this.name = name;
+    this.age = age;
+    this.healthPoints = healthPoints;
+    this.money = money;
+    this.weapon = null;
+  }
+  takeWeapon(weapon) {
+    this.weapon = weapon;
+  }
 }
 
-class CopCreate extends HumanBorn {
-    constructor() {
-        super();
-        this.status = 'cop';
+class Cop extends Human {
+  constructor(name, age, healthPoints, money) {
+    super(name, age, healthPoints, money);
+    // this.group = null;
+  }
+  eatDonut() {
+    console.log(`Cop ${this.name} eated donut!`);
+  }
+  // не удалсь реализовать метод для создания группы человеком
+  // createGroup(group) {
+  //   group = new Group()
+  //   return group
+  // }
+  // createGroup() {
+  //   let new Group();
+  // }
+  joinGroup(group) {
+    if (!(group instanceof Group))
+      return console.log(`This is not a cop formation!`);
+    if (this in group) {
+      return console.log("This cop is already in the group!");
     }
-    eatDonut() {
-        if (this.status !== 'cop') return console.log('This human is not a cop!');
-        console.log(`Cop ${this.name} eated donut!`);
-    }
-    joiningToGroup(groupName) {
-        if (this.status !== 'cop') return console.log('This human is not a cop!');
-        if (groupName.includes(this) === false) {
-            groupName.push(this);
-        } else {
-            console.log('This cop is already in the group!')
-        }
-    }
+    return (group[this.name] = this);
+  }
+  // // создать экземпляр класса Group методом копа или бандита не удалось, поэтому, как по мне, получился костыль
+  // joinGroup(group) {
+  //   if (!(group instanceof Group))
+  //     return console.log(`This is not a cop formation!`);
+  //   if (group.members.includes(this)) {
+  //     return console.log("This cop is already in the group!");
+  //   }
+  //   return group.members.push(this);
+  // }
 }
 
-class BanditCreate extends HumanBorn {
-    constructor() {
-        super();
-        this.status = 'bandit';
+class Bandit extends Human {
+  constructor(name, age, healthPoints, money) {
+    super(name, age, healthPoints, money);
+  }
+  lootCivil(civil, amount = 50) {
+    if (civil.money > amount) {
+      civil.money = civil.money - amount;
+      this.money = this.money + amount;
+      return console.log(`${civil.name} looted!`);
     }
-    lootCivilian(civilName, amountMoney) {
-        if (civilName.money > amountMoney) {
-            civilName.money = civilName.money - amountMoney;
-            this.money = this.money + amountMoney;
-            console.log(`${civilName} looted!`)
-        } else {
-            this.money = this.money + civilName.money;
-            civilName.money = 0;
-            console.log(`${civilName} gave the last money!`)
-        }
+    this.money = this.money + civil.money;
+    civil.money = 0;
+    return console.log(`${civil.name} gave the last money!`);
+  }
+  joinGroup(group) {
+    if (!(group instanceof Group)) return console.log(`This is not a cop formation!`)
+    if (this in group) {
+      return console.log("This cop is already in the group!");
     }
-    joiningToBand(bandName) {
-        if (bandName.includes(this) === false) {
-            bandName.push(this);
-        } else {
-            console.log('This bandit is already in the group!')
-        }
-    }
+    return (group[this.name] = this)
+  }
+  // joinBand(band) {
+  //   if (!(band instanceof Band))
+  //     return console.log(`This is not a bandit formation!`);
+  //   if (band.members.includes(this)) {
+  //     return console.log("This bandit is already in the group!");
+  //   }
+  //   return band.members.push(this);
+  // }
 }
 
-class CivilCreate extends HumanBorn {
-    constructor() {
-        super();
-        this.status = 'civil';
-    }
-    dismissCop(copName) {
-        if (copName.status === 'cop') {
-            if (copsGroup.includes(copName)) copsGroup.splice(copsGroup.indexOf(copName), 1); // удаление копа из группы после его увольнения         
-            copName.status = 'not a cop';
-        } else {
-            console.log('This human not a cop!')
-        }
-    }
+class Civil extends Human {
+  constructor(name, age, healthPoints, money) {
+    super(name, age, healthPoints, money);
+  }
+  // Создание нового класса civil для копа, при его увольнении, не ведет к удалению обьекта этого копа!
+  dismissCop(cop) {
+    if (!(cop instanceof Cop)) return console.log(`This is not a cop!`);
+    return new Civil(cop.name, cop.age, cop.money, cop.healthPoints);
+  }
 }
+
+class Group {}
+
+class Band {}
 
 class Weapon {
-    constructor() {
-        this.damage = damage;
-        this.accuracy = accuracy;
+  constructor(damage, accuracy) {
+    this.damage = damage;
+    this.accuracy = accuracy;
+  }
+  use(target) {
+    let shotResult = Math.floor(Math.random() * 100) / 100;
+    if (shotResult <= this.accuracy) {
+      target.healthPoints = target.healthPoints - this.damage;
+      return console.log("Hit!");
     }
+    return console.log("Miss!");
+  }
 }
 
-//массивы для кооперации
-const copsGroup = [];
-const banditsBand = [];
+// создание групп
+let group = new Group();
+let band = new Band();
 
 // создание стволов
-const pistol = new Weapon(
-    damage = 45,
-    accuracy = 0.6,
-)
-
-const shootgun = new Weapon(
-    damage = 80,
-    accuracy = 0.4,
-)
+let pistol = new Weapon(45, 0.6);
+let shootgun = new Weapon(80, 0.4);
 
 // создание человеков
-const copAlex = new CopCreate(
-    name = 'Alex',
-    age = 28,
-    healthPoint = 100,
-    money = 450,
-);
-
-const copJohn = new CopCreate(
-    name = 'John',
-    age = 30,
-    healthPoint = 100,
-    money = 400,
-);
-
-const civilPary = new CivilCreate(
-    name = 'Pary',
-    age = 24,
-    healthPoint = 100,
-    money = 40,
-);
-
-const civilMary = new CivilCreate(
-    name = 'Mary',
-    age = 25,
-    healthPoint = 100,
-    money = 80,
-);
-
-const banditJorno = new BanditCreate(
-    name = 'Jorno',
-    age = 18,
-    healthPoint = 100,
-    money = 250,
-);
-
-const banditJotaro = new BanditCreate(
-    name = 'Jotaro',
-    age = 20,
-    healthPoint = 100,
-    money = 250,
-);
+let copAlex = new Cop("Alex", 28, 100, 450);
+let copJohn = new Cop("John", 30, 100, 400);
+let civilPary = new Civil("Pary", 24, 100, 150);
+let civilMary = new Civil("Mary", 25, 100, 150);
+let banditJorno = new Bandit("Jorno", 18, 100, 250);
+let banditJotaro = new Bandit("Jotaro", 20, 100, 250);
 
 copAlex.takeWeapon(pistol);
-copAlex.joiningToGroup(copsGroup);
-copJohn.joiningToGroup(copsGroup);
+copAlex.weapon.use(copJohn);
 
 banditJorno.takeWeapon(shootgun);
-banditJorno.joiningToBand(banditsBand);
-banditJotaro.joiningToBand(banditsBand);
